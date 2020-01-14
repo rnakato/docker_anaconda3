@@ -1,38 +1,37 @@
 FROM rnakato/ubuntu:18.04
-LABEL original from continuumio/anaconda3 modified by "Ryuichiro Nakato <rnakato@iam.u-tokyo.ac.jp>"
+LABEL maintainer "Ryuichiro Nakato <rnakato@iam.u-tokyo.ac.jp>"
 
-ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
-ENV PATH /opt/conda/bin:$PATH
+WORKDIR /opt
+ENV PYENV_ROOT /opt/pyenv
+ENV PATH ${PYENV_ROOT}/bin:$PYENV_ROOT/shims:${PATH}
 
-RUN apt-get update --fix-missing \
+ENV PATH /opt/bowtie2-2.3.5.1-linux-x86_64:/opt/script:${PATH}
+
+RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+    apt-file \
+    apt-utils \
+    build-essential \
     bzip2 \
     ca-certificates \
+    cmake \
     curl \
-    dpkg \
+    emacs \
     git \
-    grep \
-    libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender1 \
-    mercurial \
-    sed \
-    subversion \
-    wget \
+    unzip \
+    vim \
+    xorg \
+    zlib1g-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-RUN wget --quiet https://repo.anaconda.com/archive/Anaconda3-2019.03-Linux-x86_64.sh -O ~/anaconda.sh \
-    && /bin/bash ~/anaconda.sh -b -p /opt/conda \
-    && rm ~/anaconda.sh \
-    && ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
-    && echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc \
-    && echo "conda activate base" >> ~/.bashrc
 
-RUN TINI_VERSION=$(curl https://github.com/krallin/tini/releases/latest | grep -o "/v.*\"" | sed 's:^..\(.*\).$:\1:') \
-    && curl -L "https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini_${TINI_VERSION}.deb" > tini.deb \
-    && dpkg -i tini.deb \
-    && rm tini.deb
+# pyenv
+RUN git clone https://github.com/yyuu/pyenv.git /opt/pyenv \
+    && pyenv install anaconda3-2019.10 \
+    && pyenv rehash \
+    && pyenv global anaconda3-2019.10
 
-ENTRYPOINT [ "/usr/bin/tini", "--" ]
-CMD [ "/bin/bash" ]
+RUN conda update -y conda \
+    && conda install -y pip numpy scipy matplotlib pandas seaborn Theano Flask SymPy IPython nltk pyqtgraph  scikit-learn notebook pep8 pyflakes pytest pytest-pep8 beautifulsoup4 lxml html5lib wheel xlrd h5py cython numexpr statsmodels openpyxl bokeh \
+    && conda install -y -c bioconda deeptools kallisto samtools htseq segway \
+    && pip install -U macs2 cutadapt pysnooper python-igraph louvain opencv-python opencv-contrib-python pycallgraph nolearn cairocffi autopep8 pystan Biopython pymp-pypi py3-ortools sphinx nbsphinx sphinx-autobuild sphinx_rtd_theme sphinxcontrib-exceltable pyfaidx cudnnenv jupyterthemes japanize-matplotlib jupyter_contrib_nbextensions dask plotly parameterized requests RSeQC PePr umap-learn black pybedtools
