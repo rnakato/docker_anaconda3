@@ -1,5 +1,5 @@
-FROM rnakato/ubuntu:18.04
-LABEL maintainer "Ryuichiro Nakato <rnakato@iam.u-tokyo.ac.jp>"
+FROM rnakato/ubuntu:20.04
+LABEL maintainer "Ryuichiro Nakato <rnakato@iqb.u-tokyo.ac.jp>"
 
 WORKDIR /opt
 ENV PYENV_ROOT /opt/pyenv
